@@ -13,7 +13,6 @@ background:#0f0f0f;
 color:white;
 }
 
-/* HEADER */
 header{
 display:flex;
 justify-content:space-between;
@@ -25,7 +24,7 @@ top:0;
 }
 
 .logo{
-color:red;
+color:#01b4e4;
 font-size:22px;
 font-weight:bold;
 }
@@ -37,14 +36,12 @@ border-radius:5px;
 width:200px;
 }
 
-/* BANNER */
 .banner{
-padding:30px;
+padding:25px;
 text-align:center;
-background:linear-gradient(to right,#000,#222);
+background:linear-gradient(90deg,#000,#111,#01b4e4);
 }
 
-/* GRID */
 .container{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
@@ -62,6 +59,7 @@ transition:0.3s;
 
 .movie:hover{
 transform:scale(1.05);
+border:2px solid #01b4e4;
 }
 
 .movie img{
@@ -75,7 +73,6 @@ padding:8px;
 font-size:14px;
 }
 
-/* PLAYER */
 #player{
 display:none;
 position:fixed;
@@ -95,11 +92,12 @@ height:100%;
 position:absolute;
 top:10px;
 right:10px;
-background:red;
+background:#01b4e4;
 border:none;
 padding:10px;
-color:white;
+color:black;
 cursor:pointer;
+font-weight:bold;
 }
 </style>
 </head>
@@ -112,7 +110,7 @@ cursor:pointer;
 </header>
 
 <div class="banner">
-🔥 Xem phim nhanh – cập nhật mỗi ngày – giao diện Netflix mini
+🔥 Kho phim tự động từ TMDB – xem trailer nhanh – giao diện Netflix mini
 </div>
 
 <div class="container" id="list"></div>
@@ -125,20 +123,25 @@ cursor:pointer;
 
 <script>
 
-/* 🔴 THAY API KEY Ở ĐÂY */
+/* 🔑 BEARER TOKEN TMDB (BẠN ĐÃ GỬI) */
 const API = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJlMjFhODVlNjM0M2Q0OTVmN2U4MmVkZmZjM2YyMWQ2NyIsIm5iZiI6MTc3ODc2ODExMi4zNzc5OTk4LCJzdWIiOiI2YTA1ZDhmMDE3MDZkMjkxZjA1ODA1NWYiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.ZD0DXp2qLkYSTQD91KhRMAV19CS6ScNaH--IAodQeM0";
 
-/* LẤY PHIM HOT */
 let store = [];
 
-fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API}`)
-.then(r=>r.json())
-.then(data=>{
-store = data.results;
-render(store);
+/* 🔥 LẤY PHIM */
+fetch("https://api.themoviedb.org/3/trending/movie/day", {
+  headers: {
+    Authorization: `Bearer ${API}`,
+    "Content-Type": "application/json"
+  }
+})
+.then(r => r.json())
+.then(data => {
+  store = data.results;
+  render(store);
 });
 
-/* HIỂN THỊ PHIM */
+/* 🎬 HIỂN THỊ */
 function render(list){
 let html="";
 list.forEach(m=>{
@@ -151,12 +154,16 @@ html+=`
 document.getElementById("list").innerHTML=html;
 }
 
-/* MỞ TRAILER */
+/* 🎞 TRAILER */
 function openMovie(id){
-fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API}`)
+fetch(`https://api.themoviedb.org/3/movie/${id}/videos`, {
+  headers: {
+    Authorization: `Bearer ${API}`
+  }
+})
 .then(r=>r.json())
 .then(v=>{
-let key=v.results[0]?.key;
+let key = v.results[0]?.key;
 if(key){
 document.getElementById("player").style.display="block";
 document.getElementById("video").src=`https://www.youtube.com/embed/${key}`;
@@ -164,13 +171,13 @@ document.getElementById("video").src=`https://www.youtube.com/embed/${key}`;
 });
 }
 
-/* ĐÓNG PLAYER */
+/* ❌ ĐÓNG */
 function closePlayer(){
 document.getElementById("player").style.display="none";
 document.getElementById("video").src="";
 }
 
-/* SEARCH */
+/* 🔍 SEARCH */
 document.getElementById("search").addEventListener("input",function(){
 let val=this.value.toLowerCase();
 render(store.filter(m=>m.title.toLowerCase().includes(val)));
